@@ -154,6 +154,9 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     )
     pause(500)
 })
+scene.onHitWall(SpriteKind.Red, function (sprite, location) {
+    sprite.destroy()
+})
 info.onCountdownEnd(function () {
     pause(100)
     Net.destroy()
@@ -199,7 +202,6 @@ info.onCountdownEnd(function () {
     }
     Threshold = Round * 25
     BeeSpeed += 10
-    BeeNeed = Round * 0
     game.showLongText("You caught " + CurrentRound + " bees!", DialogLayout.Bottom)
     if (Threshold - info.score() < 1) {
         game.showLongText("Catch as many bees as you can!", DialogLayout.Bottom)
@@ -219,7 +221,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSpri
     otherSprite.destroy()
     info.changeLifeBy(-1)
 })
-let BeeNeed = 0
+scene.onHitWall(SpriteKind.Yellow, function (sprite, location) {
+    sprite.destroy()
+})
 let EneBee: Sprite = null
 let Bee: Sprite = null
 let RandSpawn = 0
@@ -231,22 +235,19 @@ let Pause = 0
 let Net: Sprite = null
 let Threshold = 0
 let Round = 0
-scene.setBackgroundColor(7)
-tiles.setTilemap(tiles.createTilemap(hex`0c000c00000000000000000000000000000000000000000000000000000002000000010000000000000000000000000000000000000000000000000000020000000000000000000000000000000000010000000000000000000000000000000000000000000000000000020000000000000000000000000000010000000000000000000000000000000002000000000000000000`, img`
-    2 2 2 2 2 2 2 2 2 2 2 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 
-    `, [myTiles.transparency16,myTiles.tile1,myTiles.tile2], TileScale.Sixteen))
 scene.centerCameraAt(96, 0)
+scene.setBackgroundColor(7)
+tiles.setTilemap(tiles.createTilemap(hex`0c000900000000000000000000000000000000000300000000000000000002000000010000000300000000000000000000000000000000000000000000020000000000000000030000000000000000010000000000000000000000000000000000000000000003000000020000000000`, img`
+    2 2 2 2 2 2 2 2 2 2 2 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 
+    `, [myTiles.transparency16,myTiles.tile1,myTiles.tile2,myTiles.tile3], TileScale.Sixteen))
 info.setScore(0)
 info.setLife(3)
 game.setDialogCursor(img`
@@ -418,7 +419,7 @@ RedChance = 0
 CurrentRound = 0
 LastRound = 0
 game.onUpdate(function () {
-    Net.x = Hero.x + 3
+    Net.x = Hero.x + 2
     Net.bottom = Hero.y - 3
 })
 game.onUpdateInterval(refreshspeed, function () {
@@ -426,10 +427,8 @@ game.onUpdateInterval(refreshspeed, function () {
         spawnHive(Hive)
         spawnHive(Hive2)
         spawnHive(Hive3)
-    }
-    for (let value of sprites.allOfKind(SpriteKind.Yellow)) {
-        if (Bee.isHittingTile(CollisionDirection.Bottom)) {
-            value.destroy()
+        if (Round >= 6) {
+            spawnHive(Hive)
         }
     }
 })
