@@ -4,25 +4,26 @@ namespace SpriteKind {
     export const Red = SpriteKind.create()
 }
 function spawnHive (mySprite: Sprite) {
+    Bee = sprites.create(img`
+        5 5 5 
+        f f f 
+        5 5 5 
+        f f f 
+        . 5 . 
+        `, SpriteKind.Yellow)
+    Bee.setPosition(mySprite.x - 50 + RandSpawn * 15, mySprite.y + 5)
+    Bee.setVelocity(0, BeeSpeed)
     RandSpawn = randint(1, 5)
     if (randint(1, 10) <= RedChance) {
         EneBee = sprites.create(img`
-            2 2 
-            f f 
-            2 2 
-            f f 
+            2 2 2 
+            f f f 
+            2 2 2 
+            f f f 
+            . 2 . 
             `, SpriteKind.Red)
         EneBee.setVelocity(0, BeeSpeed)
         EneBee.setPosition(mySprite.x - 50 + RandSpawn * 15, mySprite.y + 5)
-    } else {
-        Bee = sprites.create(img`
-            5 5 
-            f f 
-            5 5 
-            f f 
-            `, SpriteKind.Yellow)
-        Bee.setPosition(mySprite.x - 50 + RandSpawn * 15, mySprite.y + 5)
-        Bee.setVelocity(0, BeeSpeed)
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Yellow, function (sprite, otherSprite) {
@@ -43,9 +44,15 @@ info.onCountdownEnd(function () {
         info.changeLifeBy(-1)
     }
     Round += 1
+    if (Round == 2 || (Round == 4 || (Round == 6 || Round == 8))) {
+        RedChance += 1
+    } else {
+        if (Round >= 200) {
+            refreshspeed += -50
+        }
+    }
     Threshold = Round * 20
     BeeSpeed += 10
-    RedChance += 1
     game.showLongText("You caught " + CurrentRound + " bees!", DialogLayout.Bottom)
     game.showLongText("Catch at least " + Threshold + " bees!", DialogLayout.Bottom)
     game.showLongText("Round: " + Round, DialogLayout.Bottom)
@@ -57,9 +64,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSpri
     otherSprite.destroy()
     info.changeLifeBy(-1)
 })
-let Bee: Sprite = null
 let EneBee: Sprite = null
 let RandSpawn = 0
+let Bee: Sprite = null
 let LastRound = 0
 let CurrentRound = 0
 let RedChance = 0
@@ -207,10 +214,11 @@ Hive3.setPosition(144, 12)
 info.startCountdown(15)
 Pause = 0
 BeeSpeed = 25
+let refreshspeed = 500
 RedChance = 0
 CurrentRound = 0
 LastRound = 0
-game.onUpdateInterval(500, function () {
+game.onUpdateInterval(refreshspeed, function () {
     if (Pause == 0) {
         spawnHive(Hive)
         spawnHive(Hive2)
