@@ -2,7 +2,8 @@
     "name": "Knee of the Bee",
     "description": "",
     "dependencies": {
-        "device": "*"
+        "device": "*",
+        "animation": "*"
     },
     "files": [
         "main.blocks",
