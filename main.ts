@@ -288,7 +288,6 @@ scene.onHitWall(SpriteKind.Red, function (sprite, location) {
 info.onCountdownEnd(function () {
     pause(200)
     Pause = 1
-    CombinedScore = info.player1.score() + info.player2.score()
     Net.destroy()
     Net = sprites.create(img`
         .........................
@@ -316,10 +315,17 @@ info.onCountdownEnd(function () {
     for (let value of sprites.allOfKind(SpriteKind.Red)) {
         value.destroy()
     }
+    if (Players == 2) {
+        CombinedScore = info.player1.score() + info.player2.score()
+    } else {
+        CombinedScore = info.player1.score()
+    }
     CurrentRound = CombinedScore - LastRound
     if (CombinedScore < Threshold) {
+        pause(1000)
         game.showLongText("You need Bees... You didn't get enough Bees...", DialogLayout.Bottom)
-        game.over(false)
+        game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
+        game.reset()
     }
     Round += 1
     if (Round == 2 || (Round == 4 || (Round == 6 || Round == 8))) {
@@ -390,7 +396,10 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSpri
             Hero2.destroy()
         }
         if (info.player1.life() == 0 && info.player2.life() == 0) {
-            game.over(false)
+            pause(1000)
+            game.showLongText("You died... What an an (anaphylactic) shock!", DialogLayout.Bottom)
+            game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
+            game.reset()
         }
     } else {
         info.player1.changeLifeBy(-1)
@@ -515,11 +524,12 @@ if (Players == 2) {
     Hero2.setPosition(100, 100)
     Hero2.z = 5
     Net2.z = 4
+    CombinedScore = info.player1.score() + info.player2.score()
     controller.player2.moveSprite(Hero2, 100, 0)
 } else {
     Threshold = Round * 25
 }
-CombinedScore = info.player1.score() + info.player2.score()
+CombinedScore = info.player1.score()
 info.player1.setLife(3)
 info.player1.setScore(0)
 game.showLongText("Catch at least " + Threshold + " bees!", DialogLayout.Bottom)
