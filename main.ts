@@ -667,7 +667,7 @@ Hive3.setPosition(144, 12)
 info.startCountdown(15)
 game.onUpdate(function () {
     Net.x = Hero.x + 2
-    Net.bottom = Hero.y - 2
+    Net.bottom = Hero.y - 3
     if (Players == 2) {
         Net2.x = Hero2.x + 2
         Net2.bottom = Hero2.y - 3
