@@ -33,7 +33,8 @@ function spawnHive (mySprite: Sprite) {
     }
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (info.player1.hasLife()) {
+    if (info.player1.hasLife() && !(HeroSwingNet)) {
+        HeroSwingNet = true
         animation.runImageAnimation(
         Net,
         [img`
@@ -155,10 +156,12 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         false
         )
         pause(600)
+        HeroSwingNet = false
     }
 })
 controller.player2.onButtonEvent(ControllerButton.A, ControllerButtonEvent.Pressed, function () {
-    if (info.player2.hasLife()) {
+    if (info.player2.hasLife() && !(Hero2SwingNet)) {
+        Hero2SwingNet = true
         animation.runImageAnimation(
         Net2,
         [img`
@@ -280,6 +283,7 @@ controller.player2.onButtonEvent(ControllerButton.A, ControllerButtonEvent.Press
         false
         )
         pause(600)
+        Hero2SwingNet = false
     }
 })
 scene.onHitWall(SpriteKind.Red, function (sprite, location) {
@@ -287,7 +291,7 @@ scene.onHitWall(SpriteKind.Red, function (sprite, location) {
 })
 info.onCountdownEnd(function () {
     pause(200)
-    Pause = 1
+    Pause = true
     Net.destroy()
     Net = sprites.create(img`
         .........................
@@ -370,7 +374,7 @@ info.onCountdownEnd(function () {
     }
     game.showLongText("Round: " + Round, DialogLayout.Bottom)
     LastRound = CombinedScore
-    Pause = 0
+    Pause = false
     info.startCountdown(15)
 })
 sprites.onOverlap(SpriteKind.BugNet, SpriteKind.Yellow, function (sprite, otherSprite) {
@@ -411,97 +415,94 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSpri
 scene.onHitWall(SpriteKind.Yellow, function (sprite, location) {
     sprite.destroy()
 })
-let EneBee: Sprite = null
-let Bee: Sprite = null
-let RandSpawn = 0
-let Net: Sprite = null
-let Hero: Sprite = null
-let CombinedScore = 0
-let Net2: Sprite = null
-let Hero2: Sprite = null
-let Threshold = 0
-let Players = 0
-let Round = 0
-let LastRound = 0
-let CurrentRound = 0
-let RedChance = 0
-let BeeSpeed = 0
-let Pause = 0
-scene.centerCameraAt(96, 0)
-scene.setBackgroundColor(7)
-tiles.setTilemap(tiles.createTilemap(hex`0c000900000000000000000000000000000000000300000000000000000002000000010000000300000000000000000000000000000000000000000000020000000000000000030000000000000000010000000000000000000000000000000000000000000003000000020000000000`, img`
-    2 2 2 2 2 2 2 2 2 2 2 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 
-    `, [myTiles.transparency16,myTiles.tile1,myTiles.tile2,myTiles.tile3], TileScale.Sixteen))
-game.setDialogCursor(img`
-    . . f f f . . 
-    1 1 5 5 5 5 1 
-    1 1 f f f 1 1 
-    . 1 5 5 5 1 . 
-    . f f f f f . 
-    . . 5 5 5 . . 
-    . f . . . f . 
-    `)
-game.setDialogFrame(img`
-    e e e e e e e e e e e e e e e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-    e e e e e e e e e e e e e e e 
-    `)
-game.showLongText("You need Bees! Use your Bug Net (A) to catch as many Honey Bees as you can in 15s. Avoid Killer Bees!", DialogLayout.Bottom)
-Pause = 0
-BeeSpeed = 25
-let refreshspeed = 500
-RedChance = 0
-CurrentRound = 0
-LastRound = 0
-Round = 1
-if (game.askForNumber("One or Two player?") == 2) {
-    Players = 2
-} else {
-    Players = 1
-}
-if (Players == 2) {
-    info.player2.setLife(3)
-    info.player2.setScore(0)
-    Threshold = Round * 35
-    Hero2 = sprites.create(img`
-        . . . 8 8 8 8 . . . 
-        . 8 8 6 6 6 6 8 8 . 
-        8 6 6 1 1 1 1 6 8 8 
-        8 1 1 6 1 1 1 1 6 8 
-        8 6 1 1 1 1 1 6 1 8 
-        8 6 1 1 6 1 1 1 6 8 
-        8 6 6 6 6 6 6 6 6 8 
-        6 8 8 8 8 8 8 8 8 6 
-        . 6 8 8 8 8 8 8 6 . 
-        . . . 6 8 8 6 . . . 
-        . . 8 8 8 8 8 8 8 . 
-        8 8 6 6 6 6 6 6 8 8 
-        8 6 6 1 1 1 1 6 6 8 
-        1 1 6 1 1 1 1 6 1 1 
-        . . 1 1 6 6 1 1 . . 
-        . . 8 8 . . 8 8 . . 
+blockMenu.onMenuOptionSelected(function (option, index) {
+    BeeSpeed = 25
+    refreshspeed = 500
+    RedChance = 0
+    CurrentRound = 0
+    LastRound = 0
+    Round = 1
+    if (blockMenu.selectedMenuOption() == "Two-Player Co-op") {
+        Players = 2
+    } else if (blockMenu.selectedMenuOption() == "Single-Player") {
+        Players = 1
+    } else {
+    	
+    }
+    blockMenu.closeMenu()
+    blockMenu.setControlsEnabled(false)
+    if (Players == 2) {
+        info.player2.setLife(3)
+        info.player2.setScore(0)
+        Threshold = Round * 35
+        Hero2 = sprites.create(img`
+            . . . 8 8 8 8 . . . 
+            . 8 8 6 6 6 6 8 8 . 
+            8 6 6 1 1 1 1 6 8 8 
+            8 1 1 6 1 1 1 1 6 8 
+            8 6 1 1 1 1 1 6 1 8 
+            8 6 1 1 6 1 1 1 6 8 
+            8 6 6 6 6 6 6 6 6 8 
+            6 8 8 8 8 8 8 8 8 6 
+            . 6 8 8 8 8 8 8 6 . 
+            . . . 6 8 8 6 . . . 
+            . . 8 8 8 8 8 8 8 . 
+            8 8 6 6 6 6 6 6 8 8 
+            8 6 6 1 1 1 1 6 6 8 
+            1 1 6 1 1 1 1 6 1 1 
+            . . 1 1 6 6 1 1 . . 
+            . . 8 8 . . 8 8 . . 
+            `, SpriteKind.Player)
+        Net2 = sprites.create(img`
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            `, SpriteKind.BugNet)
+        Hero2.setPosition(100, 100)
+        Hero2.z = 5
+        Net2.z = 4
+        CombinedScore = info.player1.score() + info.player2.score()
+        controller.player2.moveSprite(Hero2, 100, 0)
+    } else {
+        Threshold = Round * 25
+    }
+    CombinedScore = info.player1.score()
+    info.player1.setLife(3)
+    info.player1.setScore(0)
+    Hero = sprites.create(img`
+        . . . c c c c . . . 
+        . c c b b b b c c . 
+        c b b 1 1 1 1 b c c 
+        c 1 1 b 1 1 1 1 b c 
+        c b 1 1 1 1 1 b 1 c 
+        c b 1 1 b 1 1 1 b c 
+        c b b b b b b b b c 
+        b c b b b b b b c b 
+        . b c c c c c c b . 
+        . . b b c c b b . . 
+        . c c b b b b c c . 
+        c c b b b b b b c c 
+        c b b 1 1 1 1 b b c 
+        1 1 b 1 1 1 1 b 1 1 
+        . . 1 1 b b 1 1 . . 
+        . . c c . . c c . . 
         `, SpriteKind.Player)
-    Net2 = sprites.create(img`
+    Net = sprites.create(img`
         .........................
         .........................
         .........................
@@ -521,160 +522,180 @@ if (Players == 2) {
         .........................
         .........................
         `, SpriteKind.BugNet)
-    Hero2.setPosition(100, 100)
-    Hero2.z = 5
-    Net2.z = 4
-    CombinedScore = info.player1.score() + info.player2.score()
-    controller.player2.moveSprite(Hero2, 100, 0)
-} else {
-    Threshold = Round * 25
-}
-CombinedScore = info.player1.score()
-info.player1.setLife(3)
-info.player1.setScore(0)
-game.showLongText("Catch at least " + Threshold + " bees!", DialogLayout.Bottom)
-game.showLongText("Round: " + Round, DialogLayout.Bottom)
-game.showLongText("Press A to start round.", DialogLayout.Bottom)
-Hero = sprites.create(img`
-    . . . c c c c . . . 
-    . c c b b b b c c . 
-    c b b 1 1 1 1 b c c 
-    c 1 1 b 1 1 1 1 b c 
-    c b 1 1 1 1 1 b 1 c 
-    c b 1 1 b 1 1 1 b c 
-    c b b b b b b b b c 
-    b c b b b b b b c b 
-    . b c c c c c c b . 
-    . . b b c c b b . . 
-    . c c b b b b c c . 
-    c c b b b b b b c c 
-    c b b 1 1 1 1 b b c 
-    1 1 b 1 1 1 1 b 1 1 
-    . . 1 1 b b 1 1 . . 
-    . . c c . . c c . . 
-    `, SpriteKind.Player)
-Net = sprites.create(img`
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    .........................
-    `, SpriteKind.BugNet)
-Hero.setPosition(80, 100)
-Hero.z = 5
-Net.z = 4
-controller.moveSprite(Hero, 100, 0)
-let Hive = sprites.create(img`
-    77777777777777777777777777777777
-    77777777776667777777776677777776
-    6677777766fff667776666ff6777776f
-    ff666666ffeeeff666ffffeef67776f.
-    .fffffffeeeeeeefffeeeeeeef676f..
-    .......ffeeeeeeeeeeeeeeeecf6f...
-    ........fbeeeeefffceeeeeecff....
-    ........fbeeeef555fceeeeecf.....
-    ........fbeeeef444fceeeeecf.....
-    ........fbeeef55555fceeeecf.....
-    .........fbeef44444fceeeecf.....
-    .........fbef55ff555fceeecf.....
-    .........fbef44ff444fceeecf.....
-    ........fbeeeff444ffceeecf......
-    ........fbeeeeefffceeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeeecf.....
-    .......fbeeeeeeeeeeeeeeeecf.....
-    ......fbeeeeeeeeeeeeeeeeeecf....
-    .....fbeeeeeeeeeeeeeeeeeeecf....
-    ....fbeeeeeeeeeeeeeeeeeeeeecf...
-    `, SpriteKind.Spawn)
-let Hive2 = sprites.create(img`
-    77777777777777777777777777777777
-    77777777776667777777776677777776
-    6677777766fff667776666ff6777776f
-    ff666666ffeeeff666ffffeef67776f.
-    .fffffffeeeeeeefffeeeeeeef676f..
-    .......ffeeeeeeeeeeeeeeeecf6f...
-    ........fbeeeeefffceeeeeecff....
-    ........fbeeeef555fceeeeecf.....
-    ........fbeeeef444fceeeeecf.....
-    ........fbeeef55555fceeeecf.....
-    .........fbeef44444fceeeecf.....
-    .........fbef55ff555fceeecf.....
-    .........fbef44ff444fceeecf.....
-    ........fbeeeff444ffceeecf......
-    ........fbeeeeefffceeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeeecf.....
-    .......fbeeeeeeeeeeeeeeeecf.....
-    ......fbeeeeeeeeeeeeeeeeeecf....
-    .....fbeeeeeeeeeeeeeeeeeeecf....
-    ....fbeeeeeeeeeeeeeeeeeeeeecf...
-    `, SpriteKind.Spawn)
-let Hive3 = sprites.create(img`
-    77777777777777777777777777777777
-    77777777776667777777776677777776
-    6677777766fff667776666ff6777776f
-    ff666666ffeeeff666ffffeef67776f.
-    .fffffffeeeeeeefffeeeeeeef676f..
-    .......ffeeeeeeeeeeeeeeeecf6f...
-    ........fbeeeeefffceeeeeecff....
-    ........fbeeeef555fceeeeecf.....
-    ........fbeeeef444fceeeeecf.....
-    ........fbeeef55555fceeeecf.....
-    .........fbeef44444fceeeecf.....
-    .........fbef55ff555fceeecf.....
-    .........fbef44ff444fceeecf.....
-    ........fbeeeff444ffceeecf......
-    ........fbeeeeefffceeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeecf......
-    ........fbeeeeeeeeeeeeeeecf.....
-    .......fbeeeeeeeeeeeeeeeecf.....
-    ......fbeeeeeeeeeeeeeeeeeecf....
-    .....fbeeeeeeeeeeeeeeeeeeecf....
-    ....fbeeeeeeeeeeeeeeeeeeeeecf...
-    `, SpriteKind.Spawn)
-Hive.setPosition(95, 12)
-Hive2.setPosition(48, 12)
-Hive3.setPosition(144, 12)
-info.startCountdown(15)
+    Hero.setPosition(80, 100)
+    Hero.z = 5
+    Net.z = 4
+    controller.moveSprite(Hero, 100, 0)
+    Hive = sprites.create(img`
+        77777777777777777777777777777777
+        77777777776667777777776677777776
+        6677777766fff667776666ff6777776f
+        ff666666ffeeeff666ffffeef67776f.
+        .fffffffeeeeeeefffeeeeeeef676f..
+        .......ffeeeeeeeeeeeeeeeecf6f...
+        ........fbeeeeefffceeeeeecff....
+        ........fbeeeef555fceeeeecf.....
+        ........fbeeeef444fceeeeecf.....
+        ........fbeeef55555fceeeecf.....
+        .........fbeef44444fceeeecf.....
+        .........fbef55ff555fceeecf.....
+        .........fbef44ff444fceeecf.....
+        ........fbeeeff444ffceeecf......
+        ........fbeeeeefffceeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeeecf.....
+        .......fbeeeeeeeeeeeeeeeecf.....
+        ......fbeeeeeeeeeeeeeeeeeecf....
+        .....fbeeeeeeeeeeeeeeeeeeecf....
+        ....fbeeeeeeeeeeeeeeeeeeeeecf...
+        `, SpriteKind.Spawn)
+    Hive2 = sprites.create(img`
+        77777777777777777777777777777777
+        77777777776667777777776677777776
+        6677777766fff667776666ff6777776f
+        ff666666ffeeeff666ffffeef67776f.
+        .fffffffeeeeeeefffeeeeeeef676f..
+        .......ffeeeeeeeeeeeeeeeecf6f...
+        ........fbeeeeefffceeeeeecff....
+        ........fbeeeef555fceeeeecf.....
+        ........fbeeeef444fceeeeecf.....
+        ........fbeeef55555fceeeecf.....
+        .........fbeef44444fceeeecf.....
+        .........fbef55ff555fceeecf.....
+        .........fbef44ff444fceeecf.....
+        ........fbeeeff444ffceeecf......
+        ........fbeeeeefffceeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeeecf.....
+        .......fbeeeeeeeeeeeeeeeecf.....
+        ......fbeeeeeeeeeeeeeeeeeecf....
+        .....fbeeeeeeeeeeeeeeeeeeecf....
+        ....fbeeeeeeeeeeeeeeeeeeeeecf...
+        `, SpriteKind.Spawn)
+    Hive3 = sprites.create(img`
+        77777777777777777777777777777777
+        77777777776667777777776677777776
+        6677777766fff667776666ff6777776f
+        ff666666ffeeeff666ffffeef67776f.
+        .fffffffeeeeeeefffeeeeeeef676f..
+        .......ffeeeeeeeeeeeeeeeecf6f...
+        ........fbeeeeefffceeeeeecff....
+        ........fbeeeef555fceeeeecf.....
+        ........fbeeeef444fceeeeecf.....
+        ........fbeeef55555fceeeecf.....
+        .........fbeef44444fceeeecf.....
+        .........fbef55ff555fceeecf.....
+        .........fbef44ff444fceeecf.....
+        ........fbeeeff444ffceeecf......
+        ........fbeeeeefffceeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeecf......
+        ........fbeeeeeeeeeeeeeeecf.....
+        .......fbeeeeeeeeeeeeeeeecf.....
+        ......fbeeeeeeeeeeeeeeeeeecf....
+        .....fbeeeeeeeeeeeeeeeeeeecf....
+        ....fbeeeeeeeeeeeeeeeeeeeeecf...
+        `, SpriteKind.Spawn)
+    Hive.setPosition(95, 12)
+    Hive2.setPosition(48, 12)
+    Hive3.setPosition(144, 12)
+    game.setDialogCursor(img`
+        . . f f f . . 
+        1 1 5 5 5 5 1 
+        1 1 f f f 1 1 
+        . 1 5 5 5 1 . 
+        . f f f f f . 
+        . . 5 5 5 . . 
+        . f . . . f . 
+        `)
+    game.setDialogFrame(img`
+        e e e e e e e e e e e e e e e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e e e e e e e e e e e e e e e 
+        `)
+    game.showLongText("You need Bees! Use your Bug Net (A) to catch as many Honey Bees as you can in 15s. Avoid Killer Bees!", DialogLayout.Bottom)
+    game.showLongText("Catch at least " + Threshold + " bees!", DialogLayout.Bottom)
+    game.showLongText("Round: " + Round, DialogLayout.Bottom)
+    game.showLongText("Press A to start round.", DialogLayout.Bottom)
+    Pause = false
+    info.startCountdown(15)
+})
+let Hive3: Sprite = null
+let Hive2: Sprite = null
+let Hive: Sprite = null
+let Hero2: Sprite = null
+let Hero: Sprite = null
+let refreshspeed = 0
+let Round = 0
+let Threshold = 0
+let LastRound = 0
+let CurrentRound = 0
+let CombinedScore = 0
+let Players = 0
+let Net2: Sprite = null
+let Hero2SwingNet = false
+let Net: Sprite = null
+let HeroSwingNet = false
+let EneBee: Sprite = null
+let RedChance = 0
+let BeeSpeed = 0
+let Bee: Sprite = null
+let RandSpawn = 0
+let Pause = false
+Pause = true
+scene.centerCameraAt(96, 0)
+scene.setBackgroundColor(7)
+tiles.setTilemap(tiles.createTilemap(hex`0c000900000000000000000000000000000000000300000000000000000002000000010000000300000000000000000000000000000000000000000000020000000000000000030000000000000000010000000000000000000000000000000000000000000003000000020000000000`, img`
+    2 2 2 2 2 2 2 2 2 2 2 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 . . . . . . . . . . 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 
+    `, [myTiles.transparency16,myTiles.tile1,myTiles.tile2,myTiles.tile3], TileScale.Sixteen))
+blockMenu.showMenu(["Single-Player", "Two-Player Co-op"], MenuStyle.List, MenuLocation.BottomHalf)
+blockMenu.setColors(15, 4)
 game.onUpdate(function () {
-    Net.x = Hero.x + 2
-    Net.bottom = Hero.y - 3
-    if (Players == 2) {
-        Net2.x = Hero2.x + 2
-        Net2.bottom = Hero2.y - 3
+    if (Pause == false) {
+        Net.x = Hero.x + 2
+        Net.bottom = Hero.y - 3
+        if (Players == 2) {
+            Net2.x = Hero2.x + 2
+            Net2.bottom = Hero2.y - 3
+        }
     }
 })
 game.onUpdateInterval(refreshspeed + randint(-10, 10), function () {
-    if (Pause == 0) {
+    if (Pause == false) {
         spawnHive(Hive)
         spawnHive(Hive2)
         spawnHive(Hive3)
