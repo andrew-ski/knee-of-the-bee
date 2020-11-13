@@ -16,6 +16,7 @@ function spawnHive (mySprite: Sprite) {
         . . 5 5 5 . . 
         . f . . . f . 
         `, SpriteKind.Yellow)
+    Bee.z = 6
     Bee.setPosition(mySprite.x - 10 + RandSpawn * 5, mySprite.y + 5)
     Bee.setVelocity(0, BeeSpeed + randint(-5, 5))
     if (randint(1, 10) <= RedChance) {
@@ -30,10 +31,12 @@ function spawnHive (mySprite: Sprite) {
             `, SpriteKind.Red)
         EneBee.setVelocity(0, BeeSpeed + randint(-5, 5))
         EneBee.setPosition(mySprite.x - 10 + RandSpawn * 5, mySprite.y + 5)
+        EneBee.z = 6
     }
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (info.player1.hasLife()) {
+    if (info.player1.hasLife() && Net1Swing == false) {
+        Net1Swing = true
         animation.runImageAnimation(
         Net,
         [img`
@@ -155,10 +158,12 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         false
         )
         pause(600)
+        Net1Swing = false
     }
 })
 controller.player2.onButtonEvent(ControllerButton.A, ControllerButtonEvent.Pressed, function () {
-    if (info.player2.hasLife()) {
+    if (info.player2.hasLife() && Net2Swing == false) {
+        Net2Swing = true
         animation.runImageAnimation(
         Net2,
         [img`
@@ -280,6 +285,7 @@ controller.player2.onButtonEvent(ControllerButton.A, ControllerButtonEvent.Press
         false
         )
         pause(600)
+        Net2Swing = false
     }
 })
 scene.onHitWall(SpriteKind.Red, function (sprite, location) {
@@ -411,6 +417,8 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSpri
 scene.onHitWall(SpriteKind.Yellow, function (sprite, location) {
     sprite.destroy()
 })
+let Net2Swing = false
+let Net1Swing = false
 let EneBee: Sprite = null
 let Bee: Sprite = null
 let RandSpawn = 0
