@@ -35,8 +35,8 @@ function spawnHive (mySprite: Sprite) {
     }
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (info.player1.hasLife() && Net1Swing == false) {
-        Net1Swing = true
+    if (info.player1.hasLife() && game.runtime() > Net1Swing + 600) {
+        Net1Swing = game.runtime()
         animation.runImageAnimation(
         Net,
         [img`
@@ -157,13 +157,11 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         100,
         false
         )
-        pause(600)
-        Net1Swing = false
     }
 })
 controller.player2.onButtonEvent(ControllerButton.A, ControllerButtonEvent.Pressed, function () {
-    if (info.player2.hasLife() && Net2Swing == false) {
-        Net2Swing = true
+    if (info.player2.hasLife() && game.runtime() > Net2Swing + 600) {
+        Net2Swing = game.runtime()
         animation.runImageAnimation(
         Net2,
         [img`
@@ -284,8 +282,6 @@ controller.player2.onButtonEvent(ControllerButton.A, ControllerButtonEvent.Press
         100,
         false
         )
-        pause(600)
-        Net2Swing = false
     }
 })
 scene.onHitWall(SpriteKind.Red, function (sprite, location) {
@@ -417,14 +413,14 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSpri
 scene.onHitWall(SpriteKind.Yellow, function (sprite, location) {
     sprite.destroy()
 })
-let Net2Swing = false
-let Net1Swing = false
 let EneBee: Sprite = null
 let Bee: Sprite = null
 let RandSpawn = 0
+let Net1Swing = 0
 let Net: Sprite = null
 let Hero: Sprite = null
 let CombinedScore = 0
+let Net2Swing = 0
 let Net2: Sprite = null
 let Hero2: Sprite = null
 let Threshold = 0
@@ -532,6 +528,7 @@ if (Players == 2) {
     Hero2.setPosition(100, 100)
     Hero2.z = 5
     Net2.z = 4
+    Net2Swing = game.runtime()
     CombinedScore = info.player1.score() + info.player2.score()
     controller.player2.moveSprite(Hero2, 100, 0)
 } else {
@@ -584,6 +581,7 @@ Net = sprites.create(img`
 Hero.setPosition(80, 100)
 Hero.z = 5
 Net.z = 4
+Net1Swing = game.runtime()
 controller.moveSprite(Hero, 100, 0)
 let Hive = sprites.create(img`
     77777777777777777777777777777777
