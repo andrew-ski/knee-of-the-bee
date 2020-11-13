@@ -318,8 +318,8 @@ info.onCountdownEnd(function () {
     for (let value of sprites.allOfKind(SpriteKind.Yellow)) {
         value.destroy()
     }
-    for (let value of sprites.allOfKind(SpriteKind.Red)) {
-        value.destroy()
+    for (let value2 of sprites.allOfKind(SpriteKind.Red)) {
+        value2.destroy()
     }
     if (Players == 2) {
         CombinedScore = info.player1.score() + info.player2.score()
@@ -403,7 +403,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSpri
         }
         if (info.player1.life() == 0 && info.player2.life() == 0) {
             pause(1000)
-            game.showLongText("You died... What an an (anaphylactic) shock!", DialogLayout.Bottom)
+            game.showLongText("You died... What an (anaphylactic) shock!", DialogLayout.Bottom)
             game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
             game.reset()
         }
