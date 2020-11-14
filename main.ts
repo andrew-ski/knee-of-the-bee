@@ -660,11 +660,11 @@ function RoundReset () {
     for (let value of sprites.allOfKind(SpriteKind.BugNet)) {
         value.destroy()
     }
-    for (let value of sprites.allOfKind(SpriteKind.Yellow)) {
-        value.destroy()
-    }
-    for (let value2 of sprites.allOfKind(SpriteKind.Red)) {
+    for (let value2 of sprites.allOfKind(SpriteKind.Yellow)) {
         value2.destroy()
+    }
+    for (let value22 of sprites.allOfKind(SpriteKind.Red)) {
+        value22.destroy()
     }
 }
 function PrepNewRound () {
@@ -726,8 +726,8 @@ scene.onHitWall(SpriteKind.Yellow, function (sprite, location) {
     sprite.destroy()
 })
 function reset () {
-    for (let value of sprites.allOfKind(SpriteKind.Spawn)) {
-        value.destroy()
+    for (let value3 of sprites.allOfKind(SpriteKind.Spawn)) {
+        value3.destroy()
     }
     RoundReset()
     Hero.destroy()
