@@ -477,46 +477,14 @@ function initPlayer1 () {
     Net.z = 4
     Net1Swing = game.runtime()
 }
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSprite) {
-    otherSprite.destroy()
-    if (Players == 2) {
-        if (sprite == Hero) {
-            info.player1.changeLifeBy(-1)
-        } else if (sprite == Hero2) {
-            info.player2.changeLifeBy(-1)
-        }
-        if (info.player1.life() == 0) {
-            Hero.destroy()
-        }
-        if (info.player2.life() == 0) {
-            Hero2.destroy()
-        }
-        if (info.player1.life() == 0 && info.player2.life() == 0) {
-            pause(1000)
-            game.showLongText("You died... What an (anaphylactic) shock!", DialogLayout.Bottom)
-            game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
-            game.reset()
-        }
-    } else {
-        info.player1.changeLifeBy(-1)
-        if (info.player1.life() == 0) {
-            game.over(false)
-        }
-    }
-})
-scene.onHitWall(SpriteKind.Yellow, function (sprite, location) {
-    sprite.destroy()
-})
-blockMenu.onMenuOptionSelected(function (option, index) {
-    blockMenu.setControlsEnabled(false)
-    blockMenu.closeMenu()
+function Setup () {
     Pause = true
     BeeSpeed = 25
     RedChance = 0
     CurrentRound = 0
     LastRound = 0
     Round = 1
-    refreshspeed = 500
+    BeefreshSpeed = 500
     game.setDialogCursor(img`
         . . f f f . . 
         1 1 5 5 5 5 1 
@@ -650,13 +618,48 @@ blockMenu.onMenuOptionSelected(function (option, index) {
     Hive3.setPosition(144, 12)
     Pause = false
     info.startCountdown(15)
+}
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSprite) {
+    otherSprite.destroy()
+    if (Players == 2) {
+        if (sprite == Hero) {
+            info.player1.changeLifeBy(-1)
+        } else if (sprite == Hero2) {
+            info.player2.changeLifeBy(-1)
+        }
+        if (info.player1.life() == 0) {
+            Hero.destroy()
+        }
+        if (info.player2.life() == 0) {
+            Hero2.destroy()
+        }
+        if (info.player1.life() == 0 && info.player2.life() == 0) {
+            pause(1000)
+            game.showLongText("You died... What an (anaphylactic) shock!", DialogLayout.Bottom)
+            game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
+            game.reset()
+        }
+    } else {
+        info.player1.changeLifeBy(-1)
+        if (info.player1.life() == 0) {
+            game.over(false)
+        }
+    }
+})
+scene.onHitWall(SpriteKind.Yellow, function (sprite, location) {
+    sprite.destroy()
+})
+blockMenu.onMenuOptionSelected(function (option, index) {
+    blockMenu.setControlsEnabled(false)
+    blockMenu.closeMenu()
+    Setup()
 })
 let Hive3: Sprite = null
 let Hive2: Sprite = null
 let Hive: Sprite = null
+let BeefreshSpeed = 0
 let Hero: Sprite = null
 let Hero2: Sprite = null
-let refreshspeed = 0
 let Round = 0
 let Threshold = 0
 let LastRound = 0
@@ -673,6 +676,7 @@ let RedChance = 0
 let BeeSpeed = 0
 let Bee: Sprite = null
 let RandSpawn = 0
+let refreshspeed = 0
 scene.centerCameraAt(96, 0)
 scene.setBackgroundColor(7)
 tiles.setTilemap(tiles.createTilemap(hex`0c000900000000000000000000000000000000000300000000000000000002000000010000000300000000000000000000000000000000000000000000020000000000000000030000000000000000010000000000000000000000000000000000000000000003000000020000000000`, img`
@@ -688,7 +692,7 @@ tiles.setTilemap(tiles.createTilemap(hex`0c0009000000000000000000000000000000000
     `, [myTiles.transparency16,myTiles.tile1,myTiles.tile2,myTiles.tile3], TileScale.Sixteen))
 blockMenu.setColors(15, 4)
 blockMenu.showMenu(["Single-Player", "Two-Player Co-op", "Two-Player Versus"], MenuStyle.List, MenuLocation.BottomHalf)
-let BeefreshSpeed = 500
+refreshspeed = 500
 game.onUpdate(function () {
     if (blockMenu.isMenuOpen() == false) {
         if (Pause == false) {
