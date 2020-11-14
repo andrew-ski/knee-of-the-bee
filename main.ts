@@ -287,93 +287,103 @@ controller.player2.onButtonEvent(ControllerButton.A, ControllerButtonEvent.Press
 scene.onHitWall(SpriteKind.Red, function (sprite, location) {
     sprite.destroy()
 })
+function Start () {
+    blockMenu.setControlsEnabled(true)
+    scene.centerCameraAt(96, 0)
+    scene.setBackgroundColor(7)
+    tiles.setTilemap(tiles.createTilemap(hex`0c000900000000000000000000000000000000000300000000000000000002000000010000000300000000000000000000000000000000000000000000020000000000000000030000000000000000010000000000000000000000000000000000000000000003000000020000000000`, img`
+        2 2 2 2 2 2 2 2 2 2 2 2 
+        2 . . . . . . . . . . 2 
+        2 . . . . . . . . . . 2 
+        2 . . . . . . . . . . 2 
+        2 . . . . . . . . . . 2 
+        2 . . . . . . . . . . 2 
+        2 . . . . . . . . . . 2 
+        2 . . . . . . . . . . 2 
+        2 2 2 2 2 2 2 2 2 2 2 2 
+        `, [myTiles.transparency16,myTiles.tile1,myTiles.tile2,myTiles.tile3], TileScale.Sixteen))
+    game.setDialogFrame(img`
+        e e e e e e e e e e e e e e e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
+        e e e e e e e e e e e e e e e 
+        `)
+    game.setDialogCursor(img`
+        . . f f f . . 
+        1 1 5 5 5 5 1 
+        1 1 f f f 1 1 
+        . 1 5 5 5 1 . 
+        . f f f f f . 
+        . . 5 5 5 . . 
+        . f . . . f . 
+        `)
+    game.showLongText("You need Bees! Use your Bug Net (A) to catch as many Honey Bees as you can in 15s. Avoid Killer Bees!", DialogLayout.Bottom)
+    blockMenu.setColors(15, 4)
+    blockMenu.showMenu(["Single-Player", "Two-Player Co-op", "Two-Player Versus"], MenuStyle.List, MenuLocation.BottomHalf)
+    refreshspeed = 500
+}
 info.onCountdownEnd(function () {
     pause(200)
     Pause = true
-    Net.destroy()
-    Net = sprites.create(img`
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        .........................
-        `, SpriteKind.BugNet)
-    for (let value of sprites.allOfKind(SpriteKind.Yellow)) {
-        value.destroy()
-    }
-    for (let value2 of sprites.allOfKind(SpriteKind.Red)) {
-        value2.destroy()
-    }
-    if (Players == 2) {
-        CombinedScore = info.player1.score() + info.player2.score()
-        P2CurrentRound = info.player2.score() - P2LastRound
-    } else {
-        CombinedScore = info.player1.score()
-    }
-    P1CurrentRound = info.player1.score() - P1LastRound
-    CurrentRound = CombinedScore - LastRound
-    if (!(VersusMode) && CombinedScore < Threshold) {
-        pause(1000)
-        game.showLongText("You need Bees... You didn't get enough Bees...", DialogLayout.Bottom)
-        game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
-        game.reset()
-    }
-    Round += 1
-    if (Round == 2 || (Round == 4 || (Round == 6 || Round == 8))) {
-        RedChance += 1
-    } else {
-        if (refreshspeed >= 150) {
-            refreshspeed += -50
-        }
-    }
-    if (Players == 2) {
-        Threshold = Round * 35
-        Net2.destroy()
-        Net2 = sprites.create(img`
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            .........................
-            `, SpriteKind.BugNet)
-    } else {
-        Threshold = Round * 25
-    }
-    BeeSpeed += 10
-    if (!(VersusMode)) {
-        game.showLongText("You caught " + CurrentRound + " bees!", DialogLayout.Bottom)
-        if (Threshold - CombinedScore < 1) {
-            game.showLongText("Catch as many bees as you can!", DialogLayout.Bottom)
+    RoundReset()
+    if (SinglePlayer == true) {
+        if (info.player1.score() < Threshold) {
+            pause(1000)
+            game.showLongText("You need Bees... You didn't get enough Bees...", DialogLayout.Bottom)
+            game.over(false)
         } else {
-            game.showLongText("Catch at least " + (Threshold - CombinedScore) + " bees!", DialogLayout.Bottom)
+            Round += 1
+            Threshold = Round * 25
+            CurrentRound = info.player1.score() - LastRound
+            LastRound = info.player1.score()
+            game.showLongText("You caught " + CurrentRound + " bees!", DialogLayout.Bottom)
+            if (Threshold - info.player1.score() < 1) {
+                game.showLongText("Catch as many bees as you can!", DialogLayout.Bottom)
+            } else {
+                game.showLongText("Catch at least " + (Threshold - info.player1.score()) + " bees!", DialogLayout.Bottom)
+            }
+            PrepNewRound()
         }
-    } else {
+    } else if (Coop == true) {
+        CombinedScore = info.player1.score() + info.player2.score()
+        if (CombinedScore < Threshold) {
+            pause(1000)
+            game.showLongText("You need Bees... You didn't get enough Bees...", DialogLayout.Bottom)
+            if (CombinedScore > CoopHighScore) {
+                game.showLongText("New Co-Op High Score! " + CombinedScore + "", DialogLayout.Bottom)
+                CoopHighScore = CombinedScore
+                reset()
+            } else {
+                game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
+                game.showLongText("Co-Op High Score: " + CoopHighScore, DialogLayout.Bottom)
+                reset()
+            }
+            Round += 1
+            Threshold = Round * 35
+            CurrentRound = CombinedScore - LastRound
+            LastRound = CombinedScore
+            game.showLongText("You caught " + CurrentRound + " bees!", DialogLayout.Bottom)
+            if (Threshold - CombinedScore < 1) {
+                game.showLongText("Catch as many bees as you can!", DialogLayout.Bottom)
+            } else {
+                game.showLongText("Catch at least " + (Threshold - CombinedScore) + " bees!", DialogLayout.Bottom)
+            }
+            PrepNewRound()
+        }
+    } else if (VersusMode == true) {
+        P1CurrentRound = info.player1.score() - P1LastRound
+        P2CurrentRound = info.player2.score() - P2LastRound
         if (P1CurrentRound > P2CurrentRound) {
             game.showLongText("Player 1 Wins Round: " + Round, DialogLayout.Bottom)
             game.showLongText("Player 1:" + P1CurrentRound, DialogLayout.Bottom)
@@ -385,15 +395,11 @@ info.onCountdownEnd(function () {
         } else {
             game.showLongText("Round: " + Round + "is a tie!", DialogLayout.Bottom)
         }
-    }
-    game.showLongText("Round: " + Round, DialogLayout.Bottom)
-    if (VersusMode == true) {
         P1LastRound = info.player1.score()
         P2LastRound = info.player2.score()
+        Round += 1
+        PrepNewRound()
     }
-    LastRound = CombinedScore
-    Pause = false
-    info.startCountdown(15)
 })
 function initPlayer2 () {
     info.player2.setLife(3)
@@ -509,46 +515,29 @@ function Setup () {
     LastRound = 0
     Round = 1
     BeefreshSpeed = 500
-    game.setDialogCursor(img`
-        . . f f f . . 
-        1 1 5 5 5 5 1 
-        1 1 f f f 1 1 
-        . 1 5 5 5 1 . 
-        . f f f f f . 
-        . . 5 5 5 . . 
-        . f . . . f . 
-        `)
-    game.setDialogFrame(img`
-        e e e e e e e e e e e e e e e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e 4 4 4 4 4 4 4 4 4 4 4 4 4 e 
-        e e e e e e e e e e e e e e e 
-        `)
-    game.showLongText("You need Bees! Use your Bug Net (A) to catch as many Honey Bees as you can in 15s. Avoid Killer Bees!", DialogLayout.Bottom)
     initPlayer1()
     if (blockMenu.selectedMenuOption() == "Single-Player") {
         Players = 1
+        SinglePlayer = true
+        info.player1.setScore(0)
         Threshold = Round * 25
         CombinedScore = info.player1.score()
         game.showLongText("Catch at least " + Threshold + " bees!", DialogLayout.Bottom)
     } else if (blockMenu.selectedMenuOption() == "Two-Player Co-op") {
         Players = 2
+        Coop = true
+        info.player1.setScore(0)
+        info.player2.setScore(0)
         initPlayer2()
         Threshold = Round * 35
         CombinedScore = info.player1.score() + info.player2.score()
+        if (CombinedScore > CoopHighScore) {
+            CoopHighScore = CombinedScore
+        }
         game.showLongText("Catch at least " + Threshold + " bees!", DialogLayout.Bottom)
     } else if (blockMenu.selectedMenuOption() == "Two-Player Versus") {
+        info.player1.setScore(0)
+        info.player2.setScore(0)
         VersusMode = true
         Players = 2
         initPlayer2()
@@ -662,9 +651,17 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSpri
         }
         if (info.player1.life() == 0 && info.player2.life() == 0) {
             pause(1000)
-            if (!(VersusMode)) {
+            if (Coop == true) {
                 game.showLongText("You died... What an (anaphylactic) shock!", DialogLayout.Bottom)
-                game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
+                if (CombinedScore > CoopHighScore) {
+                    game.showLongText("New Co-Op High Score! " + CombinedScore + "", DialogLayout.Bottom)
+                    CoopHighScore = CombinedScore
+                    reset()
+                } else {
+                    game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
+                    game.showLongText("Co-Op High Score: " + CoopHighScore, DialogLayout.Bottom)
+                    reset()
+                }
             } else {
                 if (info.player1.score() > info.player2.score()) {
                     game.showLongText("Player 1 Wins!", DialogLayout.Bottom)
@@ -678,14 +675,95 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSpri
         }
     } else {
         info.player1.changeLifeBy(-1)
-        if (info.player1.life() == 0) {
+        if (info.player1.life() <= 0) {
             game.over(false)
         }
     }
 })
+function RoundReset () {
+    for (let value of sprites.allOfKind(SpriteKind.BugNet)) {
+        value.destroy()
+    }
+    for (let value of sprites.allOfKind(SpriteKind.Yellow)) {
+        value.destroy()
+    }
+    for (let value2 of sprites.allOfKind(SpriteKind.Red)) {
+        value2.destroy()
+    }
+    Net = sprites.create(img`
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        .........................
+        `, SpriteKind.BugNet)
+    if (Players == 2) {
+        Net2 = sprites.create(img`
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            .........................
+            `, SpriteKind.BugNet)
+    }
+}
+function PrepNewRound () {
+    BeeSpeed += 10
+    if (Round == 2 || (Round == 4 || (Round == 6 || Round == 8))) {
+        RedChance += 1
+    } else {
+        if (refreshspeed >= 150) {
+            refreshspeed += -50
+        }
+    }
+    game.showLongText("Round: " + Round, DialogLayout.Bottom)
+    Pause = false
+    info.startCountdown(15)
+}
 scene.onHitWall(SpriteKind.Yellow, function (sprite, location) {
     sprite.destroy()
 })
+function reset () {
+    Hero.destroy()
+    Net.destroy()
+    Hero2.destroy()
+    Net2.destroy()
+    Hive.destroy()
+    Hive2.destroy()
+    Hive3.destroy()
+    refreshspeed = 500
+    CombinedScore = 0
+    SinglePlayer = false
+    Coop = false
+    VersusMode = false
+    Start()
+}
 blockMenu.onMenuOptionSelected(function (option, index) {
     blockMenu.setControlsEnabled(false)
     blockMenu.closeMenu()
@@ -694,21 +772,25 @@ blockMenu.onMenuOptionSelected(function (option, index) {
 let Hive3: Sprite = null
 let Hive2: Sprite = null
 let Hive: Sprite = null
+let Players = 0
 let BeefreshSpeed = 0
 let Hero: Sprite = null
 let Hero2: Sprite = null
+let P2LastRound = 0
+let P2CurrentRound = 0
+let P1LastRound = 0
+let P1CurrentRound = 0
+let CoopHighScore = 0
+let CombinedScore = 0
+let LastRound = 0
+let CurrentRound = 0
 let Round = 0
 let Threshold = 0
 let VersusMode = false
-let LastRound = 0
-let CurrentRound = 0
-let P1LastRound = 0
-let P1CurrentRound = 0
-let P2LastRound = 0
-let P2CurrentRound = 0
-let CombinedScore = 0
-let Players = 0
+let Coop = false
+let SinglePlayer = false
 let Pause = false
+let refreshspeed = 0
 let Net2: Sprite = null
 let Net2Swing = 0
 let Net: Sprite = null
@@ -718,23 +800,7 @@ let RedChance = 0
 let BeeSpeed = 0
 let Bee: Sprite = null
 let RandSpawn = 0
-let refreshspeed = 0
-scene.centerCameraAt(96, 0)
-scene.setBackgroundColor(7)
-tiles.setTilemap(tiles.createTilemap(hex`0c000900000000000000000000000000000000000300000000000000000002000000010000000300000000000000000000000000000000000000000000020000000000000000030000000000000000010000000000000000000000000000000000000000000003000000020000000000`, img`
-    2 2 2 2 2 2 2 2 2 2 2 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 . . . . . . . . . . 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 
-    `, [myTiles.transparency16,myTiles.tile1,myTiles.tile2,myTiles.tile3], TileScale.Sixteen))
-blockMenu.setColors(15, 4)
-blockMenu.showMenu(["Single-Player", "Two-Player Co-op", "Two-Player Versus"], MenuStyle.List, MenuLocation.BottomHalf)
-refreshspeed = 500
+Start()
 game.onUpdate(function () {
     if (blockMenu.isMenuOpen() == false) {
         if (Pause == false) {
