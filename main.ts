@@ -319,11 +319,13 @@ info.onCountdownEnd(function () {
     }
     if (Players == 2) {
         CombinedScore = info.player1.score() + info.player2.score()
+        P2CurrentRound = info.player2.score() - P2LastRound
     } else {
         CombinedScore = info.player1.score()
     }
+    P1CurrentRound = info.player1.score() - P1LastRound
     CurrentRound = CombinedScore - LastRound
-    if (CombinedScore < Threshold) {
+    if (!(VersusMode) && CombinedScore < Threshold) {
         pause(1000)
         game.showLongText("You need Bees... You didn't get enough Bees...", DialogLayout.Bottom)
         game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
@@ -364,13 +366,31 @@ info.onCountdownEnd(function () {
         Threshold = Round * 25
     }
     BeeSpeed += 10
-    game.showLongText("You caught " + CurrentRound + " bees!", DialogLayout.Bottom)
-    if (Threshold - CombinedScore < 1) {
-        game.showLongText("Catch as many bees as you can!", DialogLayout.Bottom)
+    if (!(VersusMode)) {
+        game.showLongText("You caught " + CurrentRound + " bees!", DialogLayout.Bottom)
+        if (Threshold - CombinedScore < 1) {
+            game.showLongText("Catch as many bees as you can!", DialogLayout.Bottom)
+        } else {
+            game.showLongText("Catch at least " + (Threshold - CombinedScore) + " bees!", DialogLayout.Bottom)
+        }
     } else {
-        game.showLongText("Catch at least " + (Threshold - CombinedScore) + " bees!", DialogLayout.Bottom)
+        if (P1CurrentRound > P2CurrentRound) {
+            game.showLongText("Player 1 Wins Round: " + Round, DialogLayout.Bottom)
+            game.showLongText("Player 1:" + P1CurrentRound, DialogLayout.Bottom)
+            game.showLongText("Player 2:" + P2CurrentRound, DialogLayout.Bottom)
+        } else if (P2CurrentRound > P1CurrentRound) {
+            game.showLongText("Player 2 Wins Round: " + Round, DialogLayout.Bottom)
+            game.showLongText("Player 2:" + P2CurrentRound, DialogLayout.Bottom)
+            game.showLongText("Player 1:" + P1CurrentRound, DialogLayout.Bottom)
+        } else {
+            game.showLongText("Round: " + Round + "is a tie!", DialogLayout.Bottom)
+        }
     }
     game.showLongText("Round: " + Round, DialogLayout.Bottom)
+    if (VersusMode == true) {
+        P1LastRound = info.player1.score()
+        P2LastRound = info.player2.score()
+    }
     LastRound = CombinedScore
     Pause = false
     info.startCountdown(15)
@@ -481,6 +501,10 @@ function Setup () {
     Pause = true
     BeeSpeed = 25
     RedChance = 0
+    P1CurrentRound = 0
+    P1LastRound = 0
+    P1CurrentRound = 0
+    P2LastRound = 0
     CurrentRound = 0
     LastRound = 0
     Round = 1
@@ -515,18 +539,21 @@ function Setup () {
     initPlayer1()
     if (blockMenu.selectedMenuOption() == "Single-Player") {
         Players = 1
+        Threshold = Round * 25
+        CombinedScore = info.player1.score()
+        game.showLongText("Catch at least " + Threshold + " bees!", DialogLayout.Bottom)
     } else if (blockMenu.selectedMenuOption() == "Two-Player Co-op") {
         Players = 2
         initPlayer2()
-    }
-    if (Players == 2) {
         Threshold = Round * 35
         CombinedScore = info.player1.score() + info.player2.score()
-    } else {
-        Threshold = Round * 25
+        game.showLongText("Catch at least " + Threshold + " bees!", DialogLayout.Bottom)
+    } else if (blockMenu.selectedMenuOption() == "Two-Player Versus") {
+        VersusMode = true
+        Players = 2
+        initPlayer2()
+        game.showLongText("Compete to catch the most bees!", DialogLayout.Bottom)
     }
-    CombinedScore = info.player1.score()
-    game.showLongText("Catch at least " + Threshold + " bees!", DialogLayout.Bottom)
     game.showLongText("Round: " + Round, DialogLayout.Bottom)
     game.showLongText("Press A to start round.", DialogLayout.Bottom)
     Hive = sprites.create(img`
@@ -635,8 +662,18 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Red, function (sprite, otherSpri
         }
         if (info.player1.life() == 0 && info.player2.life() == 0) {
             pause(1000)
-            game.showLongText("You died... What an (anaphylactic) shock!", DialogLayout.Bottom)
-            game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
+            if (!(VersusMode)) {
+                game.showLongText("You died... What an (anaphylactic) shock!", DialogLayout.Bottom)
+                game.showLongText("Score: " + CombinedScore, DialogLayout.Bottom)
+            } else {
+                if (info.player1.score() > info.player2.score()) {
+                    game.showLongText("Player 1 Wins!", DialogLayout.Bottom)
+                } else if (info.player2.score() > info.player1.score()) {
+                    game.showLongText("Player 2 Wins!", DialogLayout.Bottom)
+                } else {
+                    game.showLongText("Nobody Wins! Everybody Loses!", DialogLayout.Bottom)
+                }
+            }
             game.reset()
         }
     } else {
@@ -662,8 +699,13 @@ let Hero: Sprite = null
 let Hero2: Sprite = null
 let Round = 0
 let Threshold = 0
+let VersusMode = false
 let LastRound = 0
 let CurrentRound = 0
+let P1LastRound = 0
+let P1CurrentRound = 0
+let P2LastRound = 0
+let P2CurrentRound = 0
 let CombinedScore = 0
 let Players = 0
 let Pause = false
