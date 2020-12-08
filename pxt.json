@@ -5,7 +5,8 @@
     "dependencies": {
         "device": "*",
         "animation": "*",
-        "block-menu": "github:riknoll/arcade-custom-menu#v0.0.1"
+        "block-menu": "github:riknoll/arcade-custom-menu#v0.0.1",
+        "pxt-rtttl": "github:pelikhan/pxt-rtttl#v0.0.10"
     },
     "files": [
         "main.blocks",
@@ -19,7 +20,7 @@
         "test.ts"
     ],
     "targetVersions": {
-        "target": "1.2.9",
+        "target": "1.2.10",
         "targetId": "arcade"
     },
     "supportedTargets": [
